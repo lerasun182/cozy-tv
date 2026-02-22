@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Cozy Retro TV</title>
+
+<style>
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: radial-gradient(circle at 50% 30%, #1a1f3a, #0c0f1f);
+  color:white;
+  font-family: Arial, sans-serif;
+}
+
+.tv{
+  position:relative;
+  width:800px;
+  max-width:95vw;
+}
+
+.screen{
+  position:absolute;
+  left:12%;
+  top:15%;
+  width:56%;
+  height:60%;
+  background:black;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+.player{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  transition:opacity .2s;
+}
+
+.player.active{
+  opacity:1;
+}
+
+.static{
+  position:absolute;
+  inset:0;
+  background:black;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  transition:opacity .15s;
+}
+
+.static.show{
+  opacity:1;
+}
+
+.static img{
+  width:120%;
+  height:120%;
+  object-fit:cover;
+}
+
+.frame{
+  width:100%;
+  pointer-events:none;
+}
+
+.controls{
+  margin-top:20px;
+  text-align:center;
+}
+
+button{
+  margin:5px;
+  padding:10px 14px;
+  border-radius:10px;
+  border:none;
+  background:#2a2f55;
+  color:white;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#3a4090;
+}
+
+input[type=range]{
+  width:150px;
+}
+</style>
+</head>
+
+<body>
+
+<div>
+  <div class="tv">
+    <div class="screen">
+      <div id="player0" class="player active"></div>
+      <div id="player1" class="player"></div>
+      <div id="player2" class="player"></div>
+      <div class="static" id="static">
+        <img src="static.gif">
+      </div>
+    </div>
+    <img src="tv.png" class="frame">
+  </div>
+
+  <div class="controls">
+    <button id="power">▶ Play</button>
+    <button onclick="switchChannel(0)">Телепередачі</button>
+    <button onclick="switchChannel(1)">Радіо Україна</button>
+    <button onclick="switchChannel(2)">Музика</button>
+    <br><br>
+    Volume <input type="range" id="volume" min="0" max="100" value="40">
+  </div>
+</div>
+
+<script src="https://www.youtube.com/iframe_api"></script>
+
+<script>
+const PLAYLISTS = [
+  "PL721NrD9dr5IacSk-nD3WFZOfQhyBnyra", // Телепередачі
+  "PL721NrD9dr5ILoJG8LIjC8XtnLpgrWwNX", // Радіо Україна
+  "PL721NrD9dr5KTCet9ru6BInjlRn7Q4yHa"  // Музика
+];
+
+let players = [];
+let activeChannel = 0;
+let started = false;
+
+function onYouTubeIframeAPIReady(){
+  PLAYLISTS.forEach((id, index)=>{
+    players[index] = new YT.Player("player"+index,{
+      width:"100%",
+      height:"100%",
+      playerVars:{
+        autoplay:0,
+        controls:0,
+        rel:0,
+        listType:"playlist",
+        list:id,
+        loop:1,
+        playlist:id
+      },
+      events:{
+        onReady:(e)=>{
+          e.target.setVolume(40);
+          if(index !== activeChannel){
+            e.target.mute();
+          }
+        }
+      }
+    });
+  });
+}
+
+function showStatic(){
+  const s = document.getElementById("static");
+  s.classList.add("show");
+  setTimeout(()=>s.classList.remove("show"),500);
+}
+
+function switchChannel(index){
+  if(index===activeChannel) return;
+
+  showStatic();
+
+  document.getElementById("player"+activeChannel).classList.remove("active");
+  document.getElementById("player"+index).classList.add("active");
+
+  players.forEach((p,i)=>{
+    if(i===index){
+      p.unMute();
+      p.setVolume(document.getElementById("volume").value);
+    } else {
+      p.mute();
+    }
+  });
+
+  activeChannel = index;
+}
+
+document.getElementById("power").onclick=function(){
+  if(!started){
+    players.forEach((p,i)=>{
+      p.playVideo();
+      if(i!==activeChannel) p.mute();
+    });
+    this.textContent="⏸ Pause";
+    started=true;
+  } else {
+    players.forEach(p=>p.pauseVideo());
+    this.textContent="▶ Play";
+    started=false;
+  }
+}
+
+document.getElementById("volume").oninput=function(){
+  players[activeChannel].setVolume(this.value);
+}
+</script>
+
+</body>
+</html>
