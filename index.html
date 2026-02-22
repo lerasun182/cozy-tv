@@ -6,205 +6,707 @@
 <title>Cozy Retro TV</title>
 
 <style>
-body{
-  margin:0;
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background: radial-gradient(circle at 50% 30%, #1a1f3a, #0c0f1f);
-  color:white;
-  font-family: Arial, sans-serif;
-}
+  :root{
+    --bg1:#070a12;
+    --bg2:#0b0f1f;
+    --warm1: rgba(255, 196, 120, .22);
+    --warm2: rgba(255, 120, 80, .12);
+    --cool: rgba(120, 140, 255, .18);
 
-.tv{
-  position:relative;
-  width:800px;
-  max-width:95vw;
-}
+    --panel: rgba(20, 18, 30, .78);
+    --panelBorder: rgba(255,255,255,.10);
+    --panelHi: rgba(255,255,255,.16);
 
-.screen{
-  position:absolute;
-  left:12%;
-  top:15%;
-  width:56%;
-  height:60%;
-  background:black;
-  border-radius:20px;
-  overflow:hidden;
-}
+    --text: rgba(255,255,255,.92);
+    --muted: rgba(255,255,255,.72);
 
-.player{
-  position:absolute;
-  inset:0;
-  opacity:0;
-  transition:opacity .2s;
-}
+    --shadow: 0 25px 80px rgba(0,0,0,.55);
+    --glow: 0 0 55px rgba(150, 120, 255, .20);
+  }
 
-.player.active{
-  opacity:1;
-}
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--text);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    overflow:hidden;
+    background:
+      radial-gradient(900px 500px at 70% 18%, var(--cool), transparent 65%),
+      radial-gradient(900px 520px at 20% 92%, var(--warm2), transparent 65%),
+      radial-gradient(520px 520px at 85% 35%, var(--warm1), transparent 60%),
+      linear-gradient(180deg, var(--bg1), var(--bg2));
+  }
 
-.static{
-  position:absolute;
-  inset:0;
-  background:black;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  opacity:0;
-  transition:opacity .15s;
-}
+  /* cozy bokeh */
+  body::before{
+    content:"";
+    position:fixed; inset:-30px;
+    background:
+      radial-gradient(70px 70px at 82% 28%, rgba(255,205,150,.18), transparent 60%),
+      radial-gradient(120px 120px at 78% 30%, rgba(255,205,150,.12), transparent 60%),
+      radial-gradient(90px 90px at 86% 40%, rgba(255,160,120,.10), transparent 60%),
+      radial-gradient(100px 100px at 16% 74%, rgba(140,160,255,.10), transparent 60%),
+      radial-gradient(60px 60px at 20% 78%, rgba(140,160,255,.08), transparent 60%);
+    filter: blur(10px);
+    opacity:.9;
+    pointer-events:none;
+  }
 
-.static.show{
-  opacity:1;
-}
+  /* subtle grain */
+  body::after{
+    content:"";
+    position:fixed; inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+    opacity:.55;
+    pointer-events:none;
+  }
 
-.static img{
-  width:120%;
-  height:120%;
-  object-fit:cover;
-}
+  .stage{
+    width:min(980px, 96vw);
+    display:grid;
+    gap:14px;
+    justify-items:center;
+  }
 
-.frame{
-  width:100%;
-  pointer-events:none;
-}
+  /* Table / stand */
+  .table{
+    width:min(920px, 96vw);
+    height:120px;
+    position:relative;
+    margin-top:-12px;
+    filter: drop-shadow(0 20px 40px rgba(0,0,0,.35));
+  }
+  .table::before{
+    content:"";
+    position:absolute; left:0; right:0; bottom:0;
+    height:70px;
+    border-radius: 24px;
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03)),
+      linear-gradient(90deg, rgba(80,55,40,.55), rgba(60,40,32,.65));
+    border: 1px solid rgba(255,255,255,.10);
+    box-shadow: inset 0 10px 25px rgba(0,0,0,.35);
+  }
+  .table::after{
+    content:"";
+    position:absolute; left:7%; right:7%; bottom:46px;
+    height:22px;
+    border-radius: 999px;
+    background: rgba(255, 210, 140, .10);
+    filter: blur(14px);
+  }
 
-.controls{
-  margin-top:20px;
-  text-align:center;
-}
+  /* Lamp silhouette */
+  .lamp{
+    position:absolute;
+    right: 6%;
+    top: -210px;
+    width: 200px;
+    height: 260px;
+    pointer-events:none;
+    opacity:.95;
+  }
+  .lamp .shade{
+    position:absolute;
+    right:0;
+    top:0;
+    width:200px;
+    height:140px;
+    border-radius: 18px 18px 26px 26px;
+    background: linear-gradient(180deg, rgba(255,210,150,.35), rgba(255,150,110,.18));
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 20px 50px rgba(255,180,120,.15);
+  }
+  .lamp .pole{
+    position:absolute;
+    right: 92px;
+    top: 120px;
+    width: 12px;
+    height: 120px;
+    border-radius: 10px;
+    background: rgba(255,255,255,.10);
+  }
+  .lamp .base{
+    position:absolute;
+    right: 55px;
+    top: 220px;
+    width: 90px;
+    height: 24px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.10);
+  }
+  .lamp .glow{
+    position:absolute;
+    right:-10px;
+    top:-20px;
+    width: 260px;
+    height: 220px;
+    background: radial-gradient(circle at 60% 40%, rgba(255,210,150,.25), transparent 65%);
+    filter: blur(6px);
+  }
 
-button{
-  margin:5px;
-  padding:10px 14px;
-  border-radius:10px;
-  border:none;
-  background:#2a2f55;
-  color:white;
-  cursor:pointer;
-}
+  .tv-shell{
+    position:relative;
+    width:min(900px, 96vw);
+    aspect-ratio: 16 / 10.2;
+    filter: drop-shadow(var(--shadow)) drop-shadow(var(--glow));
+  }
 
-button:hover{
-  background:#3a4090;
-}
+  /* CRT screen opening area (tweak if needed to match your tv.png) */
+  .screen{
+    position:absolute;
+    left: 12.2%;
+    top: 14.4%;
+    width: 55.8%;
+    height: 62.2%;
+    border-radius: 22px;
+    overflow:hidden;
+    background:#000;
+    box-shadow: inset 0 0 45px rgba(0,0,0,.85);
+  }
 
-input[type=range]{
-  width:150px;
-}
+  /* Curvature illusion */
+  .crt-curve{
+    position:absolute; inset:0;
+    pointer-events:none;
+    background:
+      radial-gradient(120% 100% at 50% 50%, rgba(255,255,255,.06), transparent 45%),
+      radial-gradient(120% 100% at 50% 50%, transparent 40%, rgba(0,0,0,.65) 78%),
+      radial-gradient(90% 75% at 50% 50%, transparent 50%, rgba(0,0,0,.35) 78%);
+    mix-blend-mode: overlay;
+    opacity: .85;
+  }
+
+  /* Scanlines + slight flicker */
+  .scanlines{
+    position:absolute; inset:0;
+    pointer-events:none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,.06) 0px,
+      rgba(255,255,255,.02) 1px,
+      rgba(0,0,0,0) 3px
+    );
+    opacity:.45;
+    mix-blend-mode: overlay;
+    animation: flicker 4.2s infinite;
+  }
+  @keyframes flicker{
+    0%,100%{ opacity:.42; }
+    50%{ opacity:.52; }
+  }
+
+  /* Player layers */
+  .playerBox{
+    position:absolute; inset:0;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity 160ms ease;
+  }
+  .playerBox.active{
+    opacity:1;
+    pointer-events:auto;
+  }
+
+  /* Make YouTube fill the screen (crop/zoom to remove letterboxing) */
+  .playerBox iframe{
+    position:absolute !important;
+    top:-10%;
+    left:-10%;
+    width:120% !important;
+    height:120% !important;
+  }
+
+  /* Static overlay */
+  .static{
+    position:absolute; inset:0;
+    opacity:0;
+    pointer-events:none;
+    background:#000;
+    transition: opacity 120ms ease;
+  }
+  .static.show{ opacity:1; }
+  .static img{
+    width:120%;
+    height:120%;
+    object-fit:cover;
+    opacity:.92;
+    filter: contrast(120%) brightness(108%);
+  }
+
+  /* OSD */
+  .osd{
+    position:absolute;
+    left: 14px;
+    bottom: 14px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(0,0,0,.45);
+    border: 1px solid rgba(255,255,255,.14);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 25px rgba(0,0,0,.35);
+    font-weight:700;
+    letter-spacing:.2px;
+    opacity:0;
+    transform: translateY(6px);
+    transition: opacity 220ms ease, transform 220ms ease;
+    pointer-events:none;
+    user-select:none;
+  }
+  .osd.show{
+    opacity:1;
+    transform: translateY(0);
+  }
+  .osd .sub{
+    font-weight:600;
+    color: rgba(255,255,255,.78);
+    font-size: 12px;
+    margin-top: 3px;
+  }
+
+  /* Power off collapse overlay */
+  .powerFX{
+    position:absolute; inset:0;
+    pointer-events:none;
+    background:#000;
+    opacity:0;
+    transform: scaleY(1);
+    transform-origin: 50% 50%;
+  }
+  .powerFX.run{
+    opacity:1;
+    animation: collapse 380ms ease-in forwards;
+  }
+  @keyframes collapse{
+    0%   { transform: scaleY(1); opacity:.2; }
+    55%  { transform: scaleY(.08); opacity:.9; }
+    100% { transform: scaleY(0.01); opacity:1; }
+  }
+
+  /* TV frame */
+  .frame{
+    position:absolute; inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    pointer-events:none;
+    user-select:none;
+  }
+
+  /* Integrated remote/panel */
+  .panel{
+    width:min(900px, 96vw);
+    display:grid;
+    grid-template-columns: 1.1fr 1.3fr 1fr;
+    gap:12px;
+    align-items:center;
+    padding: 12px 14px;
+    border-radius: 18px;
+    background: var(--panel);
+    border: 1px solid var(--panelBorder);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 18px 55px rgba(0,0,0,.35);
+  }
+
+  .panel .block{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+
+  .badge{
+    padding:7px 10px;
+    border-radius:999px;
+    background: rgba(0,0,0,.25);
+    border: 1px solid rgba(255,255,255,.12);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .btn{
+    border: 1px solid rgba(255,255,255,.14);
+    background:
+      linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+    color: var(--text);
+    border-radius: 14px;
+    padding: 11px 12px;
+    cursor:pointer;
+    font-weight:800;
+    letter-spacing:.2px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.12),
+      0 10px 20px rgba(0,0,0,.25);
+    user-select:none;
+  }
+  .btn:hover{ filter: brightness(1.05); }
+  .btn:active{ transform: translateY(1px); }
+
+  .btn.small{ padding: 9px 10px; border-radius: 12px; font-weight:800; }
+
+  .btn.power{
+    background:
+      linear-gradient(180deg, rgba(255,160,120,.18), rgba(255,255,255,.03));
+    border: 1px solid rgba(255,170,120,.25);
+  }
+
+  .btn.channel{
+    font-weight:900;
+  }
+
+  .btn.pill{
+    border-radius:999px;
+    padding: 10px 14px;
+  }
+
+  .volWrap{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    justify-content:flex-end;
+  }
+
+  input[type="range"]{
+    width: 210px;
+    accent-color: #d8c0ff;
+  }
+
+  .hint{
+    font-size: 12px;
+    color: rgba(255,255,255,.62);
+    line-height:1.2;
+  }
+
+  @media (max-width: 860px){
+    .panel{ grid-template-columns: 1fr; }
+    .volWrap{ justify-content:flex-start; }
+    input[type="range"]{ width: 180px; }
+  }
 </style>
 </head>
 
 <body>
+  <div class="stage">
+    <div class="tv-shell">
+      <div class="screen">
+        <div id="p0" class="playerBox active"></div>
+        <div id="p1" class="playerBox"></div>
+        <div id="p2" class="playerBox"></div>
 
-<div>
-  <div class="tv">
-    <div class="screen">
-      <div id="player0" class="player active"></div>
-      <div id="player1" class="player"></div>
-      <div id="player2" class="player"></div>
-      <div class="static" id="static">
-        <img src="static.gif">
+        <div class="static" id="static"><img src="static.gif" alt="static"></div>
+        <div class="powerFX" id="powerFX"></div>
+
+        <div class="osd" id="osd">
+          <div id="osdLine1">Телепередачі</div>
+          <div class="sub" id="osdLine2">VOL 40</div>
+        </div>
+
+        <div class="crt-curve"></div>
+        <div class="scanlines"></div>
+      </div>
+
+      <img class="frame" src="tv.png" alt="tv frame"/>
+    </div>
+
+    <div class="panel">
+      <div class="block">
+        <button class="btn power" id="powerBtn">▶ PLAY</button>
+        <span class="badge" id="statusBadge">READY</span>
+        <div class="hint">Click <b>PLAY</b> once to start all channels.<br/>Then surf like a real TV.</div>
+      </div>
+
+      <div class="block">
+        <button class="btn small pill" id="chDown">CH −</button>
+
+        <button class="btn channel" data-ch="0">Телепередачі</button>
+        <button class="btn channel" data-ch="1">Радіо Україна</button>
+        <button class="btn channel" data-ch="2">Музика</button>
+
+        <button class="btn small pill" id="chUp">CH +</button>
+      </div>
+
+      <div class="volWrap">
+        <span class="badge">VOLUME</span>
+        <input id="vol" type="range" min="0" max="100" value="40"/>
+        <button class="btn small" id="volDown">−</button>
+        <button class="btn small" id="volUp">+</button>
       </div>
     </div>
-    <img src="tv.png" class="frame">
-  </div>
 
-  <div class="controls">
-    <button id="power">▶ Play</button>
-    <button onclick="switchChannel(0)">Телепередачі</button>
-    <button onclick="switchChannel(1)">Радіо Україна</button>
-    <button onclick="switchChannel(2)">Музика</button>
-    <br><br>
-    Volume <input type="range" id="volume" min="0" max="100" value="40">
+    <div class="table">
+      <div class="lamp">
+        <div class="glow"></div>
+        <div class="shade"></div>
+        <div class="pole"></div>
+        <div class="base"></div>
+      </div>
+    </div>
   </div>
-</div>
 
 <script src="https://www.youtube.com/iframe_api"></script>
-
 <script>
-const PLAYLISTS = [
-  "PL721NrD9dr5IacSk-nD3WFZOfQhyBnyra", // Телепередачі
-  "PL721NrD9dr5ILoJG8LIjC8XtnLpgrWwNX", // Радіо Україна
-  "PL721NrD9dr5KTCet9ru6BInjlRn7Q4yHa"  // Музика
-];
+  // Your playlists in your requested order:
+  const CHANNELS = [
+    { name: "Телепередачі",  list: "PL721NrD9dr5IacSk-nD3WFZOfQhyBnyra" },
+    { name: "Радіо Україна", list: "PL721NrD9dr5ILoJG8LIjC8XtnLpgrWwNX" },
+    { name: "Музика",        list: "PL721NrD9dr5KTCet9ru6BInjlRn7Q4yHa" },
+  ];
 
-let players = [];
-let activeChannel = 0;
-let started = false;
+  let players = [];
+  let active = 0;
+  let startedOnce = false;
+  let osdTimer = null;
 
-function onYouTubeIframeAPIReady(){
-  PLAYLISTS.forEach((id, index)=>{
-    players[index] = new YT.Player("player"+index,{
-      width:"100%",
-      height:"100%",
-      playerVars:{
-        autoplay:0,
-        controls:0,
-        rel:0,
-        listType:"playlist",
-        list:id,
-        loop:1,
-        playlist:id
-      },
-      events:{
-        onReady:(e)=>{
-          e.target.setVolume(40);
-          if(index !== activeChannel){
-            e.target.mute();
+  const staticEl = document.getElementById("static");
+  const powerFX  = document.getElementById("powerFX");
+  const osdEl    = document.getElementById("osd");
+  const osdLine1 = document.getElementById("osdLine1");
+  const osdLine2 = document.getElementById("osdLine2");
+  const volEl    = document.getElementById("vol");
+  const powerBtn = document.getElementById("powerBtn");
+  const statusBadge = document.getElementById("statusBadge");
+
+  // ---------- Cozy click + static sounds (no files needed) ----------
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let audioCtx = null;
+
+  function ensureAudio(){
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === "suspended") audioCtx.resume();
+  }
+
+  function playClick(){
+    ensureAudio();
+    const t = audioCtx.currentTime;
+
+    // short "plastic button" click (two tiny transients)
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = "square";
+    o.frequency.setValueAtTime(220, t);
+    o.frequency.exponentialRampToValueAtTime(1200, t + 0.015);
+
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.12, t + 0.002);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+
+    o.connect(g).connect(audioCtx.destination);
+    o.start(t);
+    o.stop(t + 0.04);
+  }
+
+  function playHiss(duration=0.22){
+    ensureAudio();
+    const sr = audioCtx.sampleRate;
+    const len = Math.floor(sr * duration);
+    const buf = audioCtx.createBuffer(1, len, sr);
+    const data = buf.getChannelData(0);
+
+    for (let i=0;i<len;i++){
+      data[i] = (Math.random()*2-1) * 0.6;
+    }
+
+    const src = audioCtx.createBufferSource();
+    src.buffer = buf;
+
+    const bp = audioCtx.createBiquadFilter();
+    bp.type = "bandpass";
+    bp.frequency.value = 2800;
+    bp.Q.value = 0.9;
+
+    const g = audioCtx.createGain();
+    const t = audioCtx.currentTime;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+
+    src.connect(bp).connect(g).connect(audioCtx.destination);
+    src.start();
+  }
+
+  function soundChannelSwitch(){
+    playClick();
+    playHiss(0.28);
+  }
+
+  // ---------- Visual effects ----------
+  function showStatic(ms=520){
+    staticEl.classList.add("show");
+    setTimeout(()=>staticEl.classList.remove("show"), ms);
+  }
+
+  function showOSD(){
+    osdLine1.textContent = CHANNELS[active].name;
+    osdLine2.textContent = "VOL " + String(Math.round(Number(volEl.value))).padStart(2,"0");
+
+    osdEl.classList.add("show");
+    if (osdTimer) clearTimeout(osdTimer);
+    osdTimer = setTimeout(()=>osdEl.classList.remove("show"), 2000);
+  }
+
+  function powerOffFX(){
+    powerFX.classList.remove("run");
+    // restart animation reliably
+    void powerFX.offsetWidth;
+    powerFX.classList.add("run");
+    setTimeout(()=>powerFX.classList.remove("run"), 420);
+  }
+
+  function setActiveChannel(i){
+    i = (i + CHANNELS.length) % CHANNELS.length;
+    if (i === active) return;
+
+    soundChannelSwitch();
+    showStatic(560);
+
+    document.getElementById("p"+active).classList.remove("active");
+    document.getElementById("p"+i).classList.add("active");
+
+    active = i;
+    showOSD();
+
+    // Ensure sound only on active
+    players.forEach((p, idx) => {
+      try{
+        if (!p) return;
+        if (idx === active){
+          p.unMute();
+          p.setVolume(Number(volEl.value));
+          if (startedOnce) p.playVideo();
+        } else {
+          p.mute();
+        }
+      }catch(e){}
+    });
+  }
+
+  function playAll(){
+    ensureAudio();
+    soundChannelSwitch();
+    showStatic(420);
+
+    players.forEach((p, idx) => {
+      try{
+        p.playVideo();
+        if (idx === active){
+          p.unMute();
+          p.setVolume(Number(volEl.value));
+        } else {
+          p.mute();
+        }
+      }catch(e){}
+    });
+
+    startedOnce = true;
+    powerBtn.textContent = "⏸ PAUSE";
+    statusBadge.textContent = "ON AIR";
+    showOSD();
+  }
+
+  function pauseAll(){
+    ensureAudio();
+    playClick();
+    powerOffFX();
+
+    players.forEach(p => { try{ p.pauseVideo(); }catch(e){} });
+
+    powerBtn.textContent = "▶ PLAY";
+    statusBadge.textContent = "PAUSED";
+    showOSD();
+  }
+
+  // ---------- YouTube ----------
+  window.onYouTubeIframeAPIReady = function(){
+    players = CHANNELS.map((ch, idx) => {
+      return new YT.Player("p"+idx, {
+        width: "100%",
+        height: "100%",
+        playerVars: {
+          autoplay: 0,
+          controls: 0,          // hide controls
+          disablekb: 1,
+          fs: 0,
+          modestbranding: 1,
+          rel: 0,
+          iv_load_policy: 3,     // hide annotations (where applicable)
+          playsinline: 1,
+
+          // Playlist loop
+          listType: "playlist",
+          list: ch.list,
+          loop: 1,
+          playlist: ch.list
+        },
+        events: {
+          onReady: (e) => {
+            try{
+              e.target.setVolume(Number(volEl.value));
+              // Start muted unless it's active (but we still require user click to play)
+              if (idx !== active) e.target.mute();
+            }catch(err){}
           }
         }
-      }
+      });
     });
-  });
-}
 
-function showStatic(){
-  const s = document.getElementById("static");
-  s.classList.add("show");
-  setTimeout(()=>s.classList.remove("show"),500);
-}
+    // little static on first load
+    showStatic(650);
+    showOSD();
+  };
 
-function switchChannel(index){
-  if(index===activeChannel) return;
-
-  showStatic();
-
-  document.getElementById("player"+activeChannel).classList.remove("active");
-  document.getElementById("player"+index).classList.add("active");
-
-  players.forEach((p,i)=>{
-    if(i===index){
-      p.unMute();
-      p.setVolume(document.getElementById("volume").value);
-    } else {
-      p.mute();
-    }
+  // ---------- UI bindings ----------
+  document.querySelectorAll(".btn.channel").forEach(btn => {
+    btn.addEventListener("click", () => setActiveChannel(Number(btn.dataset.ch)));
   });
 
-  activeChannel = index;
-}
+  document.getElementById("chUp").addEventListener("click", () => setActiveChannel(active + 1));
+  document.getElementById("chDown").addEventListener("click", () => setActiveChannel(active - 1));
 
-document.getElementById("power").onclick=function(){
-  if(!started){
-    players.forEach((p,i)=>{
-      p.playVideo();
-      if(i!==activeChannel) p.mute();
-    });
-    this.textContent="⏸ Pause";
-    started=true;
-  } else {
-    players.forEach(p=>p.pauseVideo());
-    this.textContent="▶ Play";
-    started=false;
+  volEl.addEventListener("input", () => {
+    ensureAudio();
+    playClick();
+    try{
+      if (players[active]) players[active].setVolume(Number(volEl.value));
+    }catch(e){}
+    showOSD();
+  });
+
+  function bumpVolume(delta){
+    const v = Math.max(0, Math.min(100, Number(volEl.value) + delta));
+    volEl.value = String(v);
+    ensureAudio();
+    playClick();
+    try{ players[active]?.setVolume(v); }catch(e){}
+    showOSD();
   }
-}
 
-document.getElementById("volume").oninput=function(){
-  players[activeChannel].setVolume(this.value);
-}
+  document.getElementById("volUp").addEventListener("click", () => bumpVolume(+5));
+  document.getElementById("volDown").addEventListener("click", () => bumpVolume(-5));
+
+  powerBtn.addEventListener("click", () => {
+    // Toggle based on button label
+    if (!startedOnce){
+      playAll(); // first click starts all channels (muted except active)
+      return;
+    }
+    const isPausing = powerBtn.textContent.includes("PAUSE");
+    if (isPausing) pauseAll();
+    else playAll();
+  });
+
+  // keyboard cozy: up/down channels, left/right volume
+  window.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowUp") setActiveChannel(active + 1);
+    if (e.key === "ArrowDown") setActiveChannel(active - 1);
+    if (e.key === "ArrowRight") bumpVolume(+2);
+    if (e.key === "ArrowLeft") bumpVolume(-2);
+  });
 </script>
-
 </body>
 </html>
